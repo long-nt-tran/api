@@ -3714,6 +3714,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Status'
+  /api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/result:
+    get:
+      tags:
+        - WorkflowService
+      description: |-
+        GetWorkflowExecutionResult returns the result of a workflow execution. If the workflow
+         is still running, returns a NotCompleted response and optionally registers callbacks
+         to be invoked when the workflow completes.
+      operationId: GetWorkflowExecutionResult
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: execution.workflow_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: execution.workflowId
+          in: query
+          schema:
+            type: string
+        - name: execution.runId
+          in: query
+          schema:
+            type: string
+        - name: requestId
+          in: query
+          description: Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
+          schema:
+            type: string
+        - name: identity
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkflowExecutionResultResponse'
+        default:
+          description: Default error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
   /api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/trigger-rule:
     post:
       tags:
@@ -8659,6 +8709,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Status'
+  /namespaces/{namespace}/workflows/{execution.workflow_id}/result:
+    get:
+      tags:
+        - WorkflowService
+      description: |-
+        GetWorkflowExecutionResult returns the result of a workflow execution. If the workflow
+         is still running, returns a NotCompleted response and optionally registers callbacks
+         to be invoked when the workflow completes.
+      operationId: GetWorkflowExecutionResult
+      parameters:
+        - name: namespace
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: execution.workflow_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: execution.workflowId
+          in: query
+          schema:
+            type: string
+        - name: execution.runId
+          in: query
+          schema:
+            type: string
+        - name: requestId
+          in: query
+          description: Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
+          schema:
+            type: string
+        - name: identity
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkflowExecutionResultResponse'
+        default:
+          description: Default error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
   /namespaces/{namespace}/workflows/{execution.workflow_id}/trigger-rule:
     post:
       tags:
@@ -12149,6 +12249,65 @@ components:
           type: string
           description: Will be set if there are more history events than were included in this response
           format: bytes
+    GetWorkflowExecutionResultResponse:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+          description: |-
+            Link to the relevant history event:
+             - completion event, if the workflow has finished
+             - options-updated event, if callbacks were registered on a running workflow
+        notCompleted:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_NotCompleted'
+        completed:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Completed'
+    GetWorkflowExecutionResultResponse_Completed:
+      type: object
+      properties:
+        execution:
+          $ref: '#/components/schemas/WorkflowExecution'
+        status:
+          enum:
+            - WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
+            - WORKFLOW_EXECUTION_STATUS_RUNNING
+            - WORKFLOW_EXECUTION_STATUS_COMPLETED
+            - WORKFLOW_EXECUTION_STATUS_FAILED
+            - WORKFLOW_EXECUTION_STATUS_CANCELED
+            - WORKFLOW_EXECUTION_STATUS_TERMINATED
+            - WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW
+            - WORKFLOW_EXECUTION_STATUS_TIMED_OUT
+            - WORKFLOW_EXECUTION_STATUS_PAUSED
+          type: string
+          format: enum
+        result:
+          allOf:
+            - $ref: '#/components/schemas/Payloads'
+          description: Set only when status = COMPLETED.
+        failure:
+          allOf:
+            - $ref: '#/components/schemas/Failure'
+          description: Set for FAILED / CANCELED / TERMINATED / TIMED_OUT.
+    GetWorkflowExecutionResultResponse_NotCompleted:
+      type: object
+      properties:
+        execution:
+          $ref: '#/components/schemas/WorkflowExecution'
+        status:
+          enum:
+            - WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
+            - WORKFLOW_EXECUTION_STATUS_RUNNING
+            - WORKFLOW_EXECUTION_STATUS_COMPLETED
+            - WORKFLOW_EXECUTION_STATUS_FAILED
+            - WORKFLOW_EXECUTION_STATUS_CANCELED
+            - WORKFLOW_EXECUTION_STATUS_TERMINATED
+            - WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW
+            - WORKFLOW_EXECUTION_STATUS_TIMED_OUT
+            - WORKFLOW_EXECUTION_STATUS_PAUSED
+          type: string
+          format: enum
     GoogleProtobufAny:
       type: object
       properties:

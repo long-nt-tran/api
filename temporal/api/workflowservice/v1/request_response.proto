@@ -1163,6 +1163,44 @@ message DescribeWorkflowExecutionResponse {
     temporal.api.workflow.v1.WorkflowExecutionExtendedInfo workflow_extended_info = 8;
 }
 
+message GetWorkflowExecutionResultRequest {
+    string namespace = 1;
+    temporal.api.common.v1.WorkflowExecution execution = 2;
+    // Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
+    string request_id = 3;
+    string identity = 4;
+    // Callbacks and links to register if the workflow is not yet completed.
+    repeated temporal.api.common.v1.Callback callbacks = 5;
+    repeated temporal.api.common.v1.Link links = 6;
+}
+
+message GetWorkflowExecutionResultResponse {
+    // Link to the relevant history event:
+    // - completion event, if the workflow has finished
+    // - options-updated event, if callbacks were registered on a running workflow
+    repeated temporal.api.common.v1.Link links = 1;
+
+    // Completion status of the workflow, which carries relevant information for the caller.
+    oneof completion {
+        NotCompleted not_completed = 2;
+        Completed completed = 3;
+    }
+
+    message NotCompleted {
+        temporal.api.common.v1.WorkflowExecution execution = 1;
+        temporal.api.enums.v1.WorkflowExecutionStatus status = 2;
+    }
+
+    message Completed {
+        temporal.api.common.v1.WorkflowExecution execution = 1;
+        temporal.api.enums.v1.WorkflowExecutionStatus status    = 2;
+        // Set only when status = COMPLETED.
+        temporal.api.common.v1.Payloads result = 3;
+        // Set for FAILED / CANCELED / TERMINATED / TIMED_OUT.
+        temporal.api.failure.v1.Failure failure = 4;
+    }
+}
+
 // (-- api-linter: core::0203::optional=disabled
 //     aip.dev/not-precedent: field_behavior annotation not available in our gogo fork --)
 message DescribeTaskQueueRequest {

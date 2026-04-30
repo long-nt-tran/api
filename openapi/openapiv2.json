@@ -4134,6 +4134,62 @@
         ]
       }
     },
+    "/api/v1/namespaces/{namespace}/workflows/{execution.workflowId}/result": {
+      "get": {
+        "summary": "GetWorkflowExecutionResult returns the result of a workflow execution. If the workflow\nis still running, returns a NotCompleted response and optionally registers callbacks\nto be invoked when the workflow completes.",
+        "operationId": "GetWorkflowExecutionResult2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetWorkflowExecutionResultResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "execution.workflowId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "execution.runId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "requestId",
+            "description": "Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "identity",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "WorkflowService"
+        ]
+      }
+    },
     "/api/v1/namespaces/{namespace}/workflows/{execution.workflowId}/trigger-rule": {
       "post": {
         "summary": "TriggerWorkflowRule allows to:\n * trigger existing rule for a specific workflow execution;\n * trigger rule for a specific workflow execution without creating a rule;\nThis is useful for one-off operations.",
@@ -9609,6 +9665,62 @@
         ]
       }
     },
+    "/namespaces/{namespace}/workflows/{execution.workflowId}/result": {
+      "get": {
+        "summary": "GetWorkflowExecutionResult returns the result of a workflow execution. If the workflow\nis still running, returns a NotCompleted response and optionally registers callbacks\nto be invoked when the workflow completes.",
+        "operationId": "GetWorkflowExecutionResult",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetWorkflowExecutionResultResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "execution.workflowId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "execution.runId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "requestId",
+            "description": "Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "identity",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "WorkflowService"
+        ]
+      }
+    },
     "/namespaces/{namespace}/workflows/{execution.workflowId}/trigger-rule": {
       "post": {
         "summary": "TriggerWorkflowRule allows to:\n * trigger existing rule for a specific workflow execution;\n * trigger rule for a specific workflow execution without creating a rule;\nThis is useful for one-off operations.",
@@ -10705,6 +10817,36 @@
         }
       },
       "description": "Target a worker polling on a Nexus task queue in a specific namespace."
+    },
+    "GetWorkflowExecutionResultResponseCompleted": {
+      "type": "object",
+      "properties": {
+        "execution": {
+          "$ref": "#/definitions/v1WorkflowExecution"
+        },
+        "status": {
+          "$ref": "#/definitions/v1WorkflowExecutionStatus"
+        },
+        "result": {
+          "$ref": "#/definitions/v1Payloads",
+          "description": "Set only when status = COMPLETED."
+        },
+        "failure": {
+          "$ref": "#/definitions/v1Failure",
+          "description": "Set for FAILED / CANCELED / TERMINATED / TIMED_OUT."
+        }
+      }
+    },
+    "GetWorkflowExecutionResultResponseNotCompleted": {
+      "type": "object",
+      "properties": {
+        "execution": {
+          "$ref": "#/definitions/v1WorkflowExecution"
+        },
+        "status": {
+          "$ref": "#/definitions/v1WorkflowExecutionStatus"
+        }
+      }
     },
     "LinkActivity": {
       "type": "object",
@@ -15652,6 +15794,25 @@
           "type": "string",
           "format": "byte",
           "title": "Will be set if there are more history events than were included in this response"
+        }
+      }
+    },
+    "v1GetWorkflowExecutionResultResponse": {
+      "type": "object",
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Link"
+          },
+          "title": "Link to the relevant history event:\n- completion event, if the workflow has finished\n- options-updated event, if callbacks were registered on a running workflow"
+        },
+        "notCompleted": {
+          "$ref": "#/definitions/GetWorkflowExecutionResultResponseNotCompleted"
+        },
+        "completed": {
+          "$ref": "#/definitions/GetWorkflowExecutionResultResponseCompleted"
         }
       }
     },
