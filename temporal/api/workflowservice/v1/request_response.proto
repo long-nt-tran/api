@@ -1169,28 +1169,32 @@ message GetWorkflowExecutionResultRequest {
     // provided even if the run_id is set here. We use WorkflowExecution message for forward
     // compatibility if we want to enable getting the result of a specific run_id in the future.
     temporal.api.common.v1.WorkflowExecution execution = 2;
-    // Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
+    // A unique identifier for this create request for idempotence. Typically UUIDv4.
     string request_id = 3;
+    // The identity of the client who initiated this request.
     string identity = 4;
-    // Callbacks and links to register if the workflow is not yet completed.
-    repeated temporal.api.common.v1.Callback callbacks = 5;
+    // Callbacks to be called by the server when this activity reaches a terminal state.
+    // Callback addresses must be allowlisted in the server's dynamic configuration.
+    repeated temporal.api.common.v1.Callback completion_callbacks = 5;
+    // Links to be associated with this request. Note that completion_callbacks may also have
+    // associated links; links already included with a callback should not be duplicated here.
     repeated temporal.api.common.v1.Link links = 6;
 }
 
 message GetWorkflowExecutionResultResponse {
+    // Information about the workflow execution, including the runID that this result is associated to.
     temporal.api.common.v1.WorkflowExecution execution = 1;
-    temporal.api.enums.v1.WorkflowExecutionStatus status = 2;
 
     // Link to the relevant history event:
     // - completion event, if the workflow has finished
     // - options-updated event, if callbacks were registered on a running workflow
-    repeated temporal.api.common.v1.Link links = 3;
+    repeated temporal.api.common.v1.Link links = 2;
 
     // Completion status of the workflow, which carries relevant information for the caller.
-    oneof completion {
-        NotCompleted not_completed = 4;
-        Success success = 5;
-        Failure failure = 6;
+    oneof completion_status {
+        NotCompleted not_completed = 3;
+        Success success = 4;
+        Failure failure = 5;
     }
 
     message NotCompleted {}
@@ -1200,7 +1204,7 @@ message GetWorkflowExecutionResultResponse {
     }
 
     message Failure {
-        temporal.api.failure.v1.Failure failure = 2;
+        temporal.api.failure.v1.Failure failure = 1;
     }
 }
 

@@ -4173,13 +4173,14 @@
           },
           {
             "name": "requestId",
-            "description": "Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).",
+            "description": "A unique identifier for this create request for idempotence. Typically UUIDv4.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "identity",
+            "description": "The identity of the client who initiated this request.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -9704,13 +9705,14 @@
           },
           {
             "name": "requestId",
-            "description": "Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).",
+            "description": "A unique identifier for this create request for idempotence. Typically UUIDv4.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "identity",
+            "description": "The identity of the client who initiated this request.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -15782,10 +15784,8 @@
       "type": "object",
       "properties": {
         "execution": {
-          "$ref": "#/definitions/v1WorkflowExecution"
-        },
-        "status": {
-          "$ref": "#/definitions/v1WorkflowExecutionStatus"
+          "$ref": "#/definitions/v1WorkflowExecution",
+          "description": "Information about the workflow execution, including the runID that this result is associated to."
         },
         "links": {
           "type": "array",

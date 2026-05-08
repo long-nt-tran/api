@@ -3744,11 +3744,12 @@ paths:
             type: string
         - name: requestId
           in: query
-          description: Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
+          description: A unique identifier for this create request for idempotence. Typically UUIDv4.
           schema:
             type: string
         - name: identity
           in: query
+          description: The identity of the client who initiated this request.
           schema:
             type: string
       responses:
@@ -8739,11 +8740,12 @@ paths:
             type: string
         - name: requestId
           in: query
-          description: Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
+          description: A unique identifier for this create request for idempotence. Typically UUIDv4.
           schema:
             type: string
         - name: identity
           in: query
+          description: The identity of the client who initiated this request.
           schema:
             type: string
       responses:
@@ -12253,20 +12255,9 @@ components:
       type: object
       properties:
         execution:
-          $ref: '#/components/schemas/WorkflowExecution'
-        status:
-          enum:
-            - WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
-            - WORKFLOW_EXECUTION_STATUS_RUNNING
-            - WORKFLOW_EXECUTION_STATUS_COMPLETED
-            - WORKFLOW_EXECUTION_STATUS_FAILED
-            - WORKFLOW_EXECUTION_STATUS_CANCELED
-            - WORKFLOW_EXECUTION_STATUS_TERMINATED
-            - WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW
-            - WORKFLOW_EXECUTION_STATUS_TIMED_OUT
-            - WORKFLOW_EXECUTION_STATUS_PAUSED
-          type: string
-          format: enum
+          allOf:
+            - $ref: '#/components/schemas/WorkflowExecution'
+          description: Information about the workflow execution, including the runID that this result is associated to.
         links:
           type: array
           items:

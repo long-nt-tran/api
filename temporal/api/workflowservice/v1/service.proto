@@ -2028,15 +2028,15 @@ service WorkflowService {
     // is still running, returns a NotCompleted response and optionally registers callbacks
     // to be invoked when the workflow completes.
     rpc GetWorkflowExecutionResult (GetWorkflowExecutionResultRequest) returns (GetWorkflowExecutionResultResponse) {
-          option (google.api.http) = {
-                get: "/namespaces/{namespace}/workflows/{execution.workflow_id}/result"
-                additional_bindings {
-                    get: "/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/result"
-                }
-          };
-          option (temporal.api.protometa.v1.request_header) = {
-                header: "temporal-resource-id"
-                value: "workflow:{execution.workflow_id}"
-          };
+        option (google.api.http) = {
+            get: "/namespaces/{namespace}/workflows/{execution.workflow_id}/result"
+            additional_bindings {
+                get: "/api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/result"
+            }
+        };
+        option (temporal.api.protometa.v1.request_header) = {
+            header: "temporal-resource-id"
+            value: "workflow:{execution.workflow_id}"
+        };
     }
 }
