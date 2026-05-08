@@ -12252,6 +12252,21 @@ components:
     GetWorkflowExecutionResultResponse:
       type: object
       properties:
+        execution:
+          $ref: '#/components/schemas/WorkflowExecution'
+        status:
+          enum:
+            - WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
+            - WORKFLOW_EXECUTION_STATUS_RUNNING
+            - WORKFLOW_EXECUTION_STATUS_COMPLETED
+            - WORKFLOW_EXECUTION_STATUS_FAILED
+            - WORKFLOW_EXECUTION_STATUS_CANCELED
+            - WORKFLOW_EXECUTION_STATUS_TERMINATED
+            - WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW
+            - WORKFLOW_EXECUTION_STATUS_TIMED_OUT
+            - WORKFLOW_EXECUTION_STATUS_PAUSED
+          type: string
+          format: enum
         links:
           type: array
           items:
@@ -12262,52 +12277,23 @@ components:
              - options-updated event, if callbacks were registered on a running workflow
         notCompleted:
           $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_NotCompleted'
-        completed:
-          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Completed'
-    GetWorkflowExecutionResultResponse_Completed:
+        success:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Success'
+        failure:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Failure'
+    GetWorkflowExecutionResultResponse_Failure:
       type: object
       properties:
-        execution:
-          $ref: '#/components/schemas/WorkflowExecution'
-        status:
-          enum:
-            - WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
-            - WORKFLOW_EXECUTION_STATUS_RUNNING
-            - WORKFLOW_EXECUTION_STATUS_COMPLETED
-            - WORKFLOW_EXECUTION_STATUS_FAILED
-            - WORKFLOW_EXECUTION_STATUS_CANCELED
-            - WORKFLOW_EXECUTION_STATUS_TERMINATED
-            - WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW
-            - WORKFLOW_EXECUTION_STATUS_TIMED_OUT
-            - WORKFLOW_EXECUTION_STATUS_PAUSED
-          type: string
-          format: enum
-        result:
-          allOf:
-            - $ref: '#/components/schemas/Payloads'
-          description: Set only when status = COMPLETED.
         failure:
-          allOf:
-            - $ref: '#/components/schemas/Failure'
-          description: Set for FAILED / CANCELED / TERMINATED / TIMED_OUT.
+          $ref: '#/components/schemas/Failure'
     GetWorkflowExecutionResultResponse_NotCompleted:
       type: object
+      properties: {}
+    GetWorkflowExecutionResultResponse_Success:
+      type: object
       properties:
-        execution:
-          $ref: '#/components/schemas/WorkflowExecution'
-        status:
-          enum:
-            - WORKFLOW_EXECUTION_STATUS_UNSPECIFIED
-            - WORKFLOW_EXECUTION_STATUS_RUNNING
-            - WORKFLOW_EXECUTION_STATUS_COMPLETED
-            - WORKFLOW_EXECUTION_STATUS_FAILED
-            - WORKFLOW_EXECUTION_STATUS_CANCELED
-            - WORKFLOW_EXECUTION_STATUS_TERMINATED
-            - WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW
-            - WORKFLOW_EXECUTION_STATUS_TIMED_OUT
-            - WORKFLOW_EXECUTION_STATUS_PAUSED
-          type: string
-          format: enum
+        result:
+          $ref: '#/components/schemas/Payloads'
     GoogleProtobufAny:
       type: object
       properties:

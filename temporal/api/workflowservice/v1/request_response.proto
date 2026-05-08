@@ -1165,6 +1165,9 @@ message DescribeWorkflowExecutionResponse {
 
 message GetWorkflowExecutionResultRequest {
     string namespace = 1;
+    // For now, server will always provide the result of the latest run of the workflow_id
+    // provided even if the run_id is set here. We use WorkflowExecution message for forward
+    // compatibility if we want to enable getting the result of a specific run_id in the future.
     temporal.api.common.v1.WorkflowExecution execution = 2;
     // Used to de-dup requests (i.e., so we don't register the same callbacks multiple times).
     string request_id = 3;
@@ -1175,29 +1178,29 @@ message GetWorkflowExecutionResultRequest {
 }
 
 message GetWorkflowExecutionResultResponse {
+    temporal.api.common.v1.WorkflowExecution execution = 1;
+    temporal.api.enums.v1.WorkflowExecutionStatus status = 2;
+
     // Link to the relevant history event:
     // - completion event, if the workflow has finished
     // - options-updated event, if callbacks were registered on a running workflow
-    repeated temporal.api.common.v1.Link links = 1;
+    repeated temporal.api.common.v1.Link links = 3;
 
     // Completion status of the workflow, which carries relevant information for the caller.
     oneof completion {
-        NotCompleted not_completed = 2;
-        Completed completed = 3;
+        NotCompleted not_completed = 4;
+        Success success = 5;
+        Failure failure = 6;
     }
 
-    message NotCompleted {
-        temporal.api.common.v1.WorkflowExecution execution = 1;
-        temporal.api.enums.v1.WorkflowExecutionStatus status = 2;
+    message NotCompleted {}
+
+    message Success {
+        temporal.api.common.v1.Payloads result = 1;
     }
 
-    message Completed {
-        temporal.api.common.v1.WorkflowExecution execution = 1;
-        temporal.api.enums.v1.WorkflowExecutionStatus status    = 2;
-        // Set only when status = COMPLETED.
-        temporal.api.common.v1.Payloads result = 3;
-        // Set for FAILED / CANCELED / TERMINATED / TIMED_OUT.
-        temporal.api.failure.v1.Failure failure = 4;
+    message Failure {
+        temporal.api.failure.v1.Failure failure = 2;
     }
 }
 
