@@ -1169,11 +1169,12 @@ message GetWorkflowExecutionResultRequest {
     // provided even if the run_id is set here. We use WorkflowExecution message for forward
     // compatibility if we want to enable getting the result of a specific run_id in the future.
     temporal.api.common.v1.WorkflowExecution execution = 2;
-    // A unique identifier for this create request for idempotence. Typically UUIDv4.
+    // A unique identifier for this request for idempotence. Typically UUIDv4.
     string request_id = 3;
     // The identity of the client who initiated this request.
     string identity = 4;
-    // Callbacks to be called by the server when this activity reaches a terminal state.
+    // Callbacks to be called by the server when this worflow reaches a terminal state,
+    // in the case when we're getting the result of a running workflow.
     // Callback addresses must be allowlisted in the server's dynamic configuration.
     repeated temporal.api.common.v1.Callback completion_callbacks = 5;
     // Links to be associated with this request. Note that completion_callbacks may also have

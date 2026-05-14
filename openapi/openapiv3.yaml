@@ -3715,13 +3715,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Status'
   /api/v1/namespaces/{namespace}/workflows/{execution.workflow_id}/result:
-    get:
+    post:
       tags:
         - WorkflowService
       description: |-
-        GetWorkflowExecutionResult returns the result of a workflow execution. If the workflow
-         is still running, returns a NotCompleted response and optionally registers callbacks
-         to be invoked when the workflow completes.
+        GetWorkflowExecutionResult returns the state of a workflow execution, which may be still running,
+         completed, or failed. It can optionally register new callbacks to be invoked when Workflow reaches
+         a terminal state.
+         If the workflow is completed, it returns the result of the completed workflow.
+         NOTE: This has to be a POST since we're optionally attaching callbacks to the running workflow, which mutates it.
       operationId: GetWorkflowExecutionResult
       parameters:
         - name: namespace
@@ -3734,24 +3736,12 @@ paths:
           required: true
           schema:
             type: string
-        - name: execution.workflowId
-          in: query
-          schema:
-            type: string
-        - name: execution.runId
-          in: query
-          schema:
-            type: string
-        - name: requestId
-          in: query
-          description: A unique identifier for this create request for idempotence. Typically UUIDv4.
-          schema:
-            type: string
-        - name: identity
-          in: query
-          description: The identity of the client who initiated this request.
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetWorkflowExecutionResultRequest'
+        required: true
       responses:
         "200":
           description: OK
@@ -8711,13 +8701,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Status'
   /namespaces/{namespace}/workflows/{execution.workflow_id}/result:
-    get:
+    post:
       tags:
         - WorkflowService
       description: |-
-        GetWorkflowExecutionResult returns the result of a workflow execution. If the workflow
-         is still running, returns a NotCompleted response and optionally registers callbacks
-         to be invoked when the workflow completes.
+        GetWorkflowExecutionResult returns the state of a workflow execution, which may be still running,
+         completed, or failed. It can optionally register new callbacks to be invoked when Workflow reaches
+         a terminal state.
+         If the workflow is completed, it returns the result of the completed workflow.
+         NOTE: This has to be a POST since we're optionally attaching callbacks to the running workflow, which mutates it.
       operationId: GetWorkflowExecutionResult
       parameters:
         - name: namespace
@@ -8730,24 +8722,12 @@ paths:
           required: true
           schema:
             type: string
-        - name: execution.workflowId
-          in: query
-          schema:
-            type: string
-        - name: execution.runId
-          in: query
-          schema:
-            type: string
-        - name: requestId
-          in: query
-          description: A unique identifier for this create request for idempotence. Typically UUIDv4.
-          schema:
-            type: string
-        - name: identity
-          in: query
-          description: The identity of the client who initiated this request.
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetWorkflowExecutionResultRequest'
+        required: true
       responses:
         "200":
           description: OK
@@ -12251,6 +12231,39 @@ components:
           type: string
           description: Will be set if there are more history events than were included in this response
           format: bytes
+    GetWorkflowExecutionResultRequest:
+      type: object
+      properties:
+        namespace:
+          type: string
+        execution:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowExecution'
+          description: |-
+            For now, server will always provide the result of the latest run of the workflow_id
+             provided even if the run_id is set here. We use WorkflowExecution message for forward
+             compatibility if we want to enable getting the result of a specific run_id in the future.
+        requestId:
+          type: string
+          description: A unique identifier for this request for idempotence. Typically UUIDv4.
+        identity:
+          type: string
+          description: The identity of the client who initiated this request.
+        completionCallbacks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Callback'
+          description: |-
+            Callbacks to be called by the server when this worflow reaches a terminal state,
+             in the case when we're getting the result of a running workflow.
+             Callback addresses must be allowlisted in the server's dynamic configuration.
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+          description: |-
+            Links to be associated with this request. Note that completion_callbacks may also have
+             associated links; links already included with a callback should not be duplicated here.
     GetWorkflowExecutionResultResponse:
       type: object
       properties:
