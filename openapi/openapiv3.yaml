@@ -12281,8 +12281,8 @@ components:
              - options-updated event, if callbacks were registered on a running workflow
         running:
           $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Running'
-        succeed:
-          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Succeed'
+        success:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Success'
         failed:
           $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Failed'
     GetWorkflowExecutionResultResponse_Failed:
@@ -12293,7 +12293,7 @@ components:
     GetWorkflowExecutionResultResponse_Running:
       type: object
       properties: {}
-    GetWorkflowExecutionResultResponse_Succeed:
+    GetWorkflowExecutionResultResponse_Success:
       type: object
       properties:
         result:

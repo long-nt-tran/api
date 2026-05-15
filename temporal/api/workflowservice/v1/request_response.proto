@@ -1194,13 +1194,13 @@ message GetWorkflowExecutionResultResponse {
     // Completion status of the workflow, which carries relevant information for the caller.
     oneof completion_status {
         Running running = 3;
-        Succeed succeed = 4;
+        Success success = 4;
         Failed failed = 5;
     }
 
     message Running {}
 
-    message Succeed {
+    message Success {
         temporal.api.common.v1.Payloads result = 1;
     }
 

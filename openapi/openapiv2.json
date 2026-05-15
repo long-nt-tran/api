@@ -10807,7 +10807,7 @@
     "GetWorkflowExecutionResultResponseRunning": {
       "type": "object"
     },
-    "GetWorkflowExecutionResultResponseSucceed": {
+    "GetWorkflowExecutionResultResponseSuccess": {
       "type": "object",
       "properties": {
         "result": {
@@ -15820,8 +15820,8 @@
         "running": {
           "$ref": "#/definitions/GetWorkflowExecutionResultResponseRunning"
         },
-        "succeed": {
-          "$ref": "#/definitions/GetWorkflowExecutionResultResponseSucceed"
+        "success": {
+          "$ref": "#/definitions/GetWorkflowExecutionResultResponseSuccess"
         },
         "failed": {
           "$ref": "#/definitions/GetWorkflowExecutionResultResponseFailed"
