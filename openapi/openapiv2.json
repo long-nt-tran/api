@@ -10796,10 +10796,18 @@
       },
       "description": "Target a worker polling on a Nexus task queue in a specific namespace."
     },
-    "GetWorkflowExecutionResultResponseNotCompleted": {
+    "GetWorkflowExecutionResultResponseFailed": {
+      "type": "object",
+      "properties": {
+        "failure": {
+          "$ref": "#/definitions/v1Failure"
+        }
+      }
+    },
+    "GetWorkflowExecutionResultResponseRunning": {
       "type": "object"
     },
-    "GetWorkflowExecutionResultResponseSuccess": {
+    "GetWorkflowExecutionResultResponseSucceed": {
       "type": "object",
       "properties": {
         "result": {
@@ -13108,7 +13116,7 @@
           "description": "The time when the last attempt completed."
         },
         "lastAttemptFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The last attempt's failure, if any."
         },
         "nextAttemptScheduleTime": {
@@ -13171,7 +13179,7 @@
           "description": "The time when the last attempt completed."
         },
         "lastAttemptFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The last attempt's failure, if any."
         },
         "nextAttemptScheduleTime": {
@@ -13211,58 +13219,6 @@
         }
       },
       "description": "When StartWorkflowExecution uses the conflict policy WORKFLOW_ID_CONFLICT_POLICY_USE_EXISTING and\nthere is already an existing running workflow, OnConflictOptions defines actions to be taken on\nthe existing running workflow. In this case, it will create a WorkflowExecutionOptionsUpdatedEvent\nhistory event in the running workflow with the changes requested in this object."
-    },
-    "failureV1Failure": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        },
-        "source": {
-          "type": "string",
-          "description": "The source this Failure originated in, e.g. TypeScriptSDK / JavaSDK\nIn some SDKs this is used to rehydrate the stack trace into an exception object."
-        },
-        "stackTrace": {
-          "type": "string"
-        },
-        "encodedAttributes": {
-          "$ref": "#/definitions/v1Payload",
-          "description": "Alternative way to supply `message` and `stack_trace` and possibly other attributes, used for encryption of\nerrors originating in user code which might contain sensitive information.\nThe `encoded_attributes` Payload could represent any serializable object, e.g. JSON object or a `Failure` proto\nmessage.\n\nSDK authors:\n- The SDK should provide a default `encodeFailureAttributes` and `decodeFailureAttributes` implementation that:\n  - Uses a JSON object to represent `{ message, stack_trace }`.\n  - Overwrites the original message with \"Encoded failure\" to indicate that more information could be extracted.\n  - Overwrites the original stack_trace with an empty string.\n  - The resulting JSON object is converted to Payload using the default PayloadConverter and should be processed\n    by the user-provided PayloadCodec\n\n- If there's demand, we could allow overriding the default SDK implementation to encode other opaque Failure attributes."
-        },
-        "cause": {
-          "$ref": "#/definitions/failureV1Failure"
-        },
-        "applicationFailureInfo": {
-          "$ref": "#/definitions/v1ApplicationFailureInfo"
-        },
-        "timeoutFailureInfo": {
-          "$ref": "#/definitions/v1TimeoutFailureInfo"
-        },
-        "canceledFailureInfo": {
-          "$ref": "#/definitions/v1CanceledFailureInfo"
-        },
-        "terminatedFailureInfo": {
-          "$ref": "#/definitions/v1TerminatedFailureInfo"
-        },
-        "serverFailureInfo": {
-          "$ref": "#/definitions/v1ServerFailureInfo"
-        },
-        "resetWorkflowFailureInfo": {
-          "$ref": "#/definitions/v1ResetWorkflowFailureInfo"
-        },
-        "activityFailureInfo": {
-          "$ref": "#/definitions/v1ActivityFailureInfo"
-        },
-        "childWorkflowExecutionFailureInfo": {
-          "$ref": "#/definitions/v1ChildWorkflowExecutionFailureInfo"
-        },
-        "nexusOperationExecutionFailureInfo": {
-          "$ref": "#/definitions/v1NexusOperationFailureInfo"
-        },
-        "nexusHandlerFailureInfo": {
-          "$ref": "#/definitions/v1NexusHandlerFailureInfo"
-        }
-      }
     },
     "protobufAny": {
       "type": "object",
@@ -13378,7 +13334,7 @@
           "description": "Time when the activity transitioned to a closed state."
         },
         "lastFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Failure details from the last failed attempt."
         },
         "lastWorkerIdentity": {
@@ -13508,7 +13464,7 @@
           "description": "The result if the activity completed successfully."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The failure if the activity completed unsuccessfully."
         }
       },
@@ -13698,7 +13654,7 @@
       "type": "object",
       "properties": {
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "title": "Failure details"
         },
         "scheduledEventId": {
@@ -13800,7 +13756,7 @@
           "title": "Starting at 1, the number of times this task has been attempted"
         },
         "lastFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Will be set to the most recent failure details, if this task has previously failed and then\nbeen retried."
         },
         "workerVersion": {
@@ -13818,7 +13774,7 @@
       "type": "object",
       "properties": {
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "If this activity had failed, was retried, and then timed out, that failure is stored as the\n`cause` in here."
         },
         "scheduledEventId": {
@@ -14386,7 +14342,7 @@
       "type": "object",
       "properties": {
         "failure": {
-          "$ref": "#/definitions/failureV1Failure"
+          "$ref": "#/definitions/v1Failure"
         },
         "namespace": {
           "type": "string",
@@ -15171,7 +15127,7 @@
           "description": "The result if the operation completed successfully."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The failure if the operation completed unsuccessfully."
         },
         "longPollToken": {
@@ -15551,6 +15507,58 @@
       },
       "title": "Represents a historical replication status of a Namespace"
     },
+    "v1Failure": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "description": "The source this Failure originated in, e.g. TypeScriptSDK / JavaSDK\nIn some SDKs this is used to rehydrate the stack trace into an exception object."
+        },
+        "stackTrace": {
+          "type": "string"
+        },
+        "encodedAttributes": {
+          "$ref": "#/definitions/v1Payload",
+          "description": "Alternative way to supply `message` and `stack_trace` and possibly other attributes, used for encryption of\nerrors originating in user code which might contain sensitive information.\nThe `encoded_attributes` Payload could represent any serializable object, e.g. JSON object or a `Failure` proto\nmessage.\n\nSDK authors:\n- The SDK should provide a default `encodeFailureAttributes` and `decodeFailureAttributes` implementation that:\n  - Uses a JSON object to represent `{ message, stack_trace }`.\n  - Overwrites the original message with \"Encoded failure\" to indicate that more information could be extracted.\n  - Overwrites the original stack_trace with an empty string.\n  - The resulting JSON object is converted to Payload using the default PayloadConverter and should be processed\n    by the user-provided PayloadCodec\n\n- If there's demand, we could allow overriding the default SDK implementation to encode other opaque Failure attributes."
+        },
+        "cause": {
+          "$ref": "#/definitions/v1Failure"
+        },
+        "applicationFailureInfo": {
+          "$ref": "#/definitions/v1ApplicationFailureInfo"
+        },
+        "timeoutFailureInfo": {
+          "$ref": "#/definitions/v1TimeoutFailureInfo"
+        },
+        "canceledFailureInfo": {
+          "$ref": "#/definitions/v1CanceledFailureInfo"
+        },
+        "terminatedFailureInfo": {
+          "$ref": "#/definitions/v1TerminatedFailureInfo"
+        },
+        "serverFailureInfo": {
+          "$ref": "#/definitions/v1ServerFailureInfo"
+        },
+        "resetWorkflowFailureInfo": {
+          "$ref": "#/definitions/v1ResetWorkflowFailureInfo"
+        },
+        "activityFailureInfo": {
+          "$ref": "#/definitions/v1ActivityFailureInfo"
+        },
+        "childWorkflowExecutionFailureInfo": {
+          "$ref": "#/definitions/v1ChildWorkflowExecutionFailureInfo"
+        },
+        "nexusOperationExecutionFailureInfo": {
+          "$ref": "#/definitions/v1NexusOperationFailureInfo"
+        },
+        "nexusHandlerFailureInfo": {
+          "$ref": "#/definitions/v1NexusHandlerFailureInfo"
+        }
+      }
+    },
     "v1FetchWorkerConfigResponse": {
       "type": "object",
       "properties": {
@@ -15809,22 +15817,14 @@
           },
           "title": "Link to the relevant history event:\n- completion event, if the workflow has finished\n- options-updated event, if callbacks were registered on a running workflow"
         },
-        "notCompleted": {
-          "$ref": "#/definitions/GetWorkflowExecutionResultResponseNotCompleted"
+        "running": {
+          "$ref": "#/definitions/GetWorkflowExecutionResultResponseRunning"
         },
-        "success": {
-          "$ref": "#/definitions/GetWorkflowExecutionResultResponseSuccess"
+        "succeed": {
+          "$ref": "#/definitions/GetWorkflowExecutionResultResponseSucceed"
         },
-        "failure": {
-          "$ref": "#/definitions/v1GetWorkflowExecutionResultResponseFailure"
-        }
-      }
-    },
-    "v1GetWorkflowExecutionResultResponseFailure": {
-      "type": "object",
-      "properties": {
-        "failure": {
-          "$ref": "#/definitions/failureV1Failure"
+        "failed": {
+          "$ref": "#/definitions/GetWorkflowExecutionResultResponseFailed"
         }
       }
     },
@@ -16438,7 +16438,7 @@
           "$ref": "#/definitions/v1Header"
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Some uses of markers, like a local activity, could \"fail\". If they did that is recorded here."
         }
       }
@@ -16784,7 +16784,7 @@
           "description": "The `WORKFLOW_TASK_COMPLETED` event that the corresponding RequestCancelNexusOperation command was reported\nwith."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Failure details. A NexusOperationFailureInfo wrapping a CanceledFailureInfo."
         },
         "scheduledEventId": {
@@ -16818,7 +16818,7 @@
           "description": "The ID of the `NEXUS_OPERATION_SCHEDULED` event. Uniquely identifies this operation."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Cancellation details."
         },
         "requestId": {
@@ -16850,7 +16850,7 @@
           "description": "The time when the last attempt completed."
         },
         "lastAttemptFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The last attempt's failure, if any."
         },
         "nextAttemptScheduleTime": {
@@ -16920,7 +16920,7 @@
           "description": "The time when the last attempt completed."
         },
         "lastAttemptFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The last attempt's failure, if any."
         },
         "nextAttemptScheduleTime": {
@@ -17007,7 +17007,7 @@
           "description": "The time when the last attempt completed."
         },
         "lastAttemptFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The last attempt's failure, if any."
         },
         "nextAttemptScheduleTime": {
@@ -17144,7 +17144,7 @@
           "description": "The ID of the `NEXUS_OPERATION_SCHEDULED` event. Uniquely identifies this operation."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Failure details. A NexusOperationFailureInfo wrapping an ApplicationFailureInfo."
         },
         "requestId": {
@@ -17292,7 +17292,7 @@
           "description": "The ID of the `NEXUS_OPERATION_SCHEDULED` event. Uniquely identifies this operation."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Failure details. A NexusOperationFailureInfo wrapping a CanceledFailureInfo."
         },
         "requestId": {
@@ -17319,7 +17319,7 @@
           "$ref": "#/definitions/v1Payloads"
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure"
+          "$ref": "#/definitions/v1Failure"
         }
       },
       "description": "The outcome of a Workflow Update: success or failure."
@@ -17406,7 +17406,7 @@
           "format": "date-time"
         },
         "lastFailure": {
-          "$ref": "#/definitions/failureV1Failure"
+          "$ref": "#/definitions/v1Failure"
         },
         "lastWorkerIdentity": {
           "type": "string"
@@ -17544,7 +17544,7 @@
           "description": "The time when the last attempt completed."
         },
         "lastAttemptFailure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The last attempt's failure, if any."
         },
         "nextAttemptScheduleTime": {
@@ -17670,7 +17670,7 @@
           "description": "The result if the operation completed successfully."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The failure if the operation completed unsuccessfully."
         }
       }
@@ -18341,7 +18341,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/failureV1Failure"
+            "$ref": "#/definitions/v1Failure"
           },
           "title": "Server validation failures could include\nlast_heartbeat_details payload is too large, request failure is too large"
         }
@@ -18354,7 +18354,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/failureV1Failure"
+            "$ref": "#/definitions/v1Failure"
           },
           "title": "Server validation failures could include\nlast_heartbeat_details payload is too large, request failure is too large"
         }
@@ -20625,7 +20625,7 @@
           "$ref": "#/definitions/v1ContinueAsNewInitiator"
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "Deprecated. If a workflow's retry policy would cause a new run to start when the current one\nhas failed, this field would be populated with that failure. Now (when supported by server\nand sdk) the final event will be `WORKFLOW_EXECUTION_FAILED` with `new_execution_run_id` set."
         },
         "lastCompletionResult": {
@@ -20700,7 +20700,7 @@
       "type": "object",
       "properties": {
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "title": "Serialized result of workflow failure (ex: An exception thrown, or error returned)"
         },
         "retryState": {
@@ -20993,7 +20993,7 @@
           "$ref": "#/definitions/v1ContinueAsNewInitiator"
         },
         "continuedFailure": {
-          "$ref": "#/definitions/failureV1Failure"
+          "$ref": "#/definitions/v1Failure"
         },
         "lastCompletionResult": {
           "$ref": "#/definitions/v1Payloads"
@@ -21267,7 +21267,7 @@
           "description": "The message payload of the original request message that initiated this\nupdate."
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "description": "The cause of rejection."
         }
       }
@@ -21603,7 +21603,7 @@
           "$ref": "#/definitions/v1WorkflowTaskFailedCause"
         },
         "failure": {
-          "$ref": "#/definitions/failureV1Failure",
+          "$ref": "#/definitions/v1Failure",
           "title": "The failure details"
         },
         "identity": {

@@ -12279,21 +12279,21 @@ components:
             Link to the relevant history event:
              - completion event, if the workflow has finished
              - options-updated event, if callbacks were registered on a running workflow
-        notCompleted:
-          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_NotCompleted'
-        success:
-          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Success'
-        failure:
-          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Failure'
-    GetWorkflowExecutionResultResponse_Failure:
+        running:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Running'
+        succeed:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Succeed'
+        failed:
+          $ref: '#/components/schemas/GetWorkflowExecutionResultResponse_Failed'
+    GetWorkflowExecutionResultResponse_Failed:
       type: object
       properties:
         failure:
           $ref: '#/components/schemas/Failure'
-    GetWorkflowExecutionResultResponse_NotCompleted:
+    GetWorkflowExecutionResultResponse_Running:
       type: object
       properties: {}
-    GetWorkflowExecutionResultResponse_Success:
+    GetWorkflowExecutionResultResponse_Succeed:
       type: object
       properties:
         result:
