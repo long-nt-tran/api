@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package temporalvalidate.examples.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "temporal/api/common/v1/message.proto";
+import "temporalvalidate/v1/rules.proto";
+
+option go_package = "go.temporal.io/api/temporalvalidate/examples/v1;examples";
+
+service ExampleService {
+  rpc StartExample(StartExampleRequest) returns (StartExampleResponse) {
+    // This only opts-in validation for the request. If validation fails, server errors.
+    option (temporalvalidate.v1.request_validation).enabled = true;
+
+    // This only opts-in validation for the response. If validation fails, we log a warning.
+    // The intent is that outbound failures IMO happens due to forgetting to set fields rather
+    // than inbound where client can send _anything_.
+    option (temporalvalidate.v1.response_validation).enabled = true;
+  }
+}
+
+message StartExampleRequest {
+  // Example of a validator that enforces multiple fields at once.
+  option (buf.validate.message).cel = {
+    id: "example.run_selection"
+    message: "run_id is required when use_latest is false"
+    expression: "this.use_latest || this.run_id != ''"
+  };
+
+  // Require a nonempty namespace. Dynamic rules use this root value.
+  string namespace = 1 [(buf.validate.field).string.(temporalvalidate.v1.namespace) = true];
+  string operation_id = 2 [
+    // Require a nonempty operation ID.
+    (buf.validate.field).string.(temporalvalidate.v1.operation_id) = true,
+    // Select Server's global ID-length validator.
+    (temporalvalidate.v1.dynamic_global_max_id_length) = true
+  ];
+  // Select the same Server validator. Its length-only check accepts an empty string.
+  // This annotation does not generate an ID.
+  string request_id = 3 [(temporalvalidate.v1.dynamic_global_max_id_length) = true];
+  string run_id = 4 [
+    // Skip the UUID check for an empty value. Message CEL still applies.
+    (buf.validate.field).ignore = IGNORE_IF_ZERO_VALUE,
+    // Require a UUID when the value is nonempty.
+    (buf.validate.field).string.uuid = true
+  ];
+  // Both values are valid. This audit exclusion does not disable message CEL.
+  bool use_latest = 5 [(temporalvalidate.v1.field_coverage_ignored) = "both values are valid; run selection is checked by message CEL"];
+  Details details = 6 [
+    // Require the message to be present.
+    (buf.validate.field).required = true,
+    // Audit each child field for a validation decision.
+    (temporalvalidate.v1.validate_nested) = true
+  ];
+  repeated Details items = 7 [
+    // Allow an empty list, but no more than 10 elements.
+    (buf.validate.field).repeated.max_items = 10,
+    // Audit the child fields of each element's message type.
+    (temporalvalidate.v1.validate_nested) = true
+  ];
+  map<string, Details> named_items = 8 [
+    // Allow an empty map, but no more than 10 entries.
+    (buf.validate.field).map.max_pairs = 10,
+    // Require each key to be nonempty.
+    (buf.validate.field).map.keys.string.min_len = 1,
+    // Audit the child fields of the map's value message type.
+    (temporalvalidate.v1.validate_nested) = true
+  ];
+  temporal.api.common.v1.Payload input = 9 [
+    // Select Server's namespace payload-size validator.
+    (temporalvalidate.v1.dynamic_namespace_max_payload_size) = true,
+    // Do not audit opaque child fields. The whole-payload limit still applies.
+    (temporalvalidate.v1.nested_coverage_ignored) = "opaque payload; the dynamic rule limits serialized size"
+  ];
+  // Delegate validation and timeout caps to the named imperative validator.
+  // The author must implement that validator; this annotation performs no check.
+  google.protobuf.Duration timeout = 10 [(temporalvalidate.v1.field_coverage_ignored) = "Server validateAndNormalizeStartExample validates and caps the timeout"];
+}
+
+message Details {
+  // Require a nonempty label.
+  string label = 1 [(buf.validate.field).string.min_len = 1];
+  // Server compares reason's byte length with the limit for StartExampleRequest.namespace.
+  // That namespace applies in details, items, named_items, and the response.
+  // This length-only check allows an empty reason.
+  string reason = 2 [(temporalvalidate.v1.dynamic_namespace_max_reason_length) = true];
+}
+
+message StartExampleResponse {
+  string operation_id = 1 [
+    // Require a nonempty ID in the response.
+    (buf.validate.field).string.(temporalvalidate.v1.operation_id) = true,
+    // Select the same global ID-length validator used by the request.
+    (temporalvalidate.v1.dynamic_global_max_id_length) = true
+  ];
+  temporal.api.common.v1.Payload result = 2 [
+    // If present, check size with config for StartExampleRequest.namespace.
+    (temporalvalidate.v1.dynamic_namespace_max_payload_size) = true,
+    // Check the whole payload, not its opaque child fields.
+    (temporalvalidate.v1.nested_coverage_ignored) = "opaque payload; the dynamic rule limits serialized size"
+  ];
+  // The message is optional. Audit its child fields and check them when present.
+  Details details = 3 [(temporalvalidate.v1.validate_nested) = true];
+}

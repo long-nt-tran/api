@@ -41,7 +41,7 @@ $(PROTO_OUT):
 	mkdir $(PROTO_OUT)
 
 ##### Compile proto files for go #####
-grpc: buf-lint api-linter buf-breaking clean go-grpc fix-path
+grpc: buf-lint api-linter buf-breaking validation-lint clean go-grpc fix-path
 
 go-grpc: clean $(PROTO_OUT)
 	printf $(COLOR) "Compile for go-gRPC..."
@@ -97,12 +97,16 @@ api-linter-install:
 
 buf-install:
 	printf $(COLOR) "Install/update buf..."
-	go install github.com/bufbuild/buf/cmd/buf@v1.49.0
+	go install github.com/bufbuild/buf/cmd/buf@v1.69.0
 
 ##### Sync external proto dependencies #####
 sync-nexus-annotations:
 	printf $(COLOR) "Sync nexusannotations from buf.build/temporalio/nexus-annotations..."
 	buf export buf.build/temporalio/nexus-annotations --output .
+
+sync-protovalidate:
+	printf $(COLOR) "Sync buf/validate from buf.build/bufbuild/protovalidate..."
+	buf export buf.build/bufbuild/protovalidate --output .
 
 ##### Linters #####
 api-linter:
@@ -124,6 +128,16 @@ buf-lint: $(STAMPDIR)/buf-dep-prune
 buf-breaking:
 	@printf $(COLOR) "Run buf breaking changes check against main branch..."
 	@(cd $(PROTO_ROOT) && buf breaking --against 'https://github.com/temporalio/api.git#branch=main')
+
+validation-lint:
+	printf $(COLOR) "Check RPC validation coverage..."
+	@set -e; current=$$(mktemp); \
+	trap 'rm -f "$$current"' EXIT; \
+	buf build --as-file-descriptor-set -o "$$current"; \
+	(cd cmd/check-validation && go run . --descriptor-set "$$current")
+
+validation-test:
+	cd cmd/check-validation && go test ./...
 
 nexus-rpc-yaml: nexus-rpc-yaml-install
 	printf $(COLOR) "Generate nexus/temporal-proto-models-nexusrpc.yaml..."
