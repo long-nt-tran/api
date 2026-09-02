@@ -1,0 +1,44 @@
+syntax = "proto2";
+
+package temporalvalidate.v1;
+
+import "google/protobuf/descriptor.proto";
+import "temporalvalidate/v1/annotations.proto";
+
+option go_package = "go.temporal.io/api/temporalvalidate/v1;temporalvalidate";
+
+// Symbols select Server methods. Their implementations define value semantics.
+extend google.protobuf.FieldOptions {
+  optional bool namespace = 901001 [(rule) = {
+    function: "ValidateNamespace"
+    field_type: TYPE_STRING
+    canonical_field_names: "namespace"
+  }];
+  optional bool id_length = 901002 [(rule) = {
+    function: "ValidateIDLength"
+    field_type: TYPE_STRING
+    canonical_field_names: "operation_id"
+  }];
+  optional bool operation_name_length = 901003 [(rule) = {
+    function: "ValidateOperationNameLength"
+    field_type: TYPE_STRING
+  }];
+  optional bool payload = 901004 [(rule) = {
+    function: "ValidatePayload"
+    field_type: TYPE_MESSAGE
+    type_name: "temporal.api.common.v1.Payload"
+  }];
+  optional bool reason_length = 901005 [(rule) = {
+    function: "ValidateReasonLength"
+    field_type: TYPE_STRING
+  }];
+  optional bool service_name_length = 901006 [(rule) = {
+    function: "ValidateServiceNameLength"
+    field_type: TYPE_STRING
+  }];
+  optional bool user_metadata = 901007 [(rule) = {
+    function: "ValidateUserMetadata"
+    field_type: TYPE_MESSAGE
+    type_name: "temporal.api.sdk.v1.UserMetadata"
+  }];
+}

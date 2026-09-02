@@ -6,12 +6,15 @@ modules:
       # Vendored for api-linter (can't read the BSR); excluded so buf sees them once.
       - google
       - nexusannotations
+      - buf
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/temporalio/nexus-annotations
+  - buf.build/bufbuild/protovalidate:435963d1631043e694e56e6bcc3c79c3
 lint:
   use:
     - STANDARD
+    - PROTOVALIDATE
   ignore:
     - cmd
     - google

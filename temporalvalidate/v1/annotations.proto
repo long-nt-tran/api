@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+package temporalvalidate.v1;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "go.temporal.io/api/temporalvalidate/v1;temporalvalidate";
+
+extend google.protobuf.FieldOptions {
+  // Describes a reusable bool FieldOptions extension, not a field check.
+  optional Rule rule = 900014;
+  // Permits different semantics for a canonical field; other coverage still applies.
+  optional string canonical_rule_ignored = 900015;
+  // Records why validation belongs elsewhere or all field values are valid.
+  optional string field_coverage_ignored = 900001;
+  // Audits child fields in messages, list elements, and map message values.
+  optional bool validate_nested = 900010;
+  optional string nested_coverage_ignored = 900011;
+}
+
+// Server implements function; this metadata never executes a CEL expression.
+message Rule {
+  optional string function = 1;
+  optional google.protobuf.FieldDescriptorProto.Type field_type = 2;
+  // Required for message and enum fields; fully qualified without a leading dot.
+  optional string type_name = 3;
+  repeated string canonical_field_names = 4;
+}
+
+// Enables request rejection and response warnings for a unary RPC.
+message RPCValidation {
+  optional bool enabled = 1;
+  optional string ignored = 2;
+}
+
+extend google.protobuf.MethodOptions {
+  optional RPCValidation rpc_validation = 900003;
+}

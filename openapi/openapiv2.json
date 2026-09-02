@@ -20815,11 +20815,11 @@
       "properties": {
         "summary": {
           "$ref": "#/definitions/v1Payload",
-          "description": "Short-form text that provides a summary. This payload should be a \"json/plain\"-encoded payload\nthat is a single JSON string for use in user interfaces. User interface formatting may not\napply to this text when used in \"title\" situations. The payload data section is limited to 400\nbytes by default."
+          "description": "Summary for user interfaces. Use a json/plain payload with one JSON string.\nThe default serialized size limit is 400 bytes."
         },
         "details": {
           "$ref": "#/definitions/v1Payload",
-          "description": "Long-form text that provides details. This payload should be a \"json/plain\"-encoded payload\nthat is a single JSON string for use in user interfaces. User interface formatting may apply to\nthis text in common use. The payload data section is limited to 20000 bytes by default."
+          "description": "Details for user interfaces. Use a json/plain payload with one JSON string.\nThe default serialized size limit is 20000 bytes."
         }
       },
       "description": "Information a user can set, often for use by user interfaces."
