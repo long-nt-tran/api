@@ -1,0 +1,103 @@
+// Validation rules and coverage options for Temporal API messages.
+// proto2 is required because predefined rules use extensions.
+syntax = "proto2";
+
+package temporalvalidate.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/descriptor.proto";
+
+option go_package = "go.temporal.io/api/temporalvalidate/v1;temporalvalidate";
+
+// Explains why a reviewed field does not need an annotation rule.
+extend google.protobuf.FieldOptions {
+  optional string field_coverage_ignored = 900001;
+}
+
+enum DynamicRuleScope {
+  DYNAMIC_RULE_SCOPE_UNSPECIFIED = 0;
+  DYNAMIC_RULE_SCOPE_GLOBAL = 1;
+  DYNAMIC_RULE_SCOPE_NAMESPACE = 2;
+}
+
+message DynamicRuleSpec {
+  optional DynamicRuleScope scope = 1;
+  optional google.protobuf.FieldDescriptorProto.Type field_type = 2;
+  optional string message_type = 3;
+}
+
+extend google.protobuf.FieldOptions {
+  optional DynamicRuleSpec rule_spec = 900009;
+}
+
+// Dynamic rules backed by global dynamic config.
+extend google.protobuf.FieldOptions {
+  optional bool dynamic_global_max_id_length = 900002 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_GLOBAL
+    field_type: TYPE_STRING
+  }];
+}
+
+// Dynamic rules backed by namespace dynamic config. The enclosing message
+// must have a string field named namespace.
+extend google.protobuf.FieldOptions {
+  optional bool dynamic_namespace_max_service_name_length = 900003 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_NAMESPACE
+    field_type: TYPE_STRING
+  }];
+  optional bool dynamic_namespace_max_operation_name_length = 900004 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_NAMESPACE
+    field_type: TYPE_STRING
+  }];
+  optional bool dynamic_namespace_max_reason_length = 900005 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_NAMESPACE
+    field_type: TYPE_STRING
+  }];
+  optional bool dynamic_namespace_max_payload_size = 900006 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_NAMESPACE
+    field_type: TYPE_MESSAGE
+    message_type: "temporal.api.common.v1.Payload"
+  }];
+  optional bool dynamic_namespace_max_user_metadata_summary_size = 900007 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_NAMESPACE
+    field_type: TYPE_MESSAGE
+    message_type: "temporal.api.sdk.v1.UserMetadata"
+  }];
+  optional bool dynamic_namespace_max_user_metadata_details_size = 900008 [(rule_spec) = {
+    scope: DYNAMIC_RULE_SCOPE_NAMESPACE
+    field_type: TYPE_MESSAGE
+    message_type: "temporal.api.sdk.v1.UserMetadata"
+  }];
+}
+
+// Selects exhaustive request field validation or records why it is skipped.
+message RequestValidation {
+  optional bool enabled = 1;
+  optional string ignored = 2;
+}
+
+extend google.protobuf.MethodOptions {
+  optional RequestValidation request_validation = 900001;
+}
+
+// Reusable rules. Each attaches with
+// (buf.validate.field).string.(temporalvalidate.v1.<name>) = true
+extend buf.validate.StringRules {
+  // Must be non-empty.
+  optional bool namespace = 10003 [
+    (buf.validate.predefined).cel = {
+      id: "temporalvalidate.string.namespace"
+      message: "namespace is required"
+      expression: "this.size() > 0"
+    }
+  ];
+
+  // Must be non-empty.
+  optional bool operation_id = 10004 [
+    (buf.validate.predefined).cel = {
+      id: "temporalvalidate.string.operation_id"
+      message: "operation_id is required"
+      expression: "this.size() > 0"
+    }
+  ];
+}

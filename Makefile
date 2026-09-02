@@ -36,12 +36,15 @@ OAPI_OUT := openapi
 OAPI3_PATH := .components.schemas.Payload
 
 NEX_GEN ?= nex-gen
+VALIDATION_BASE ?= $(shell git merge-base HEAD upstream/main 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null)
+SERVER_VALIDATION_RULES ?=
+SERVER_VALIDATION_RULES_URL ?= https://raw.githubusercontent.com/temporalio/temporal/main/chasm/lib/nexusoperation/dynamic_rules.json
 
 $(PROTO_OUT):
 	mkdir $(PROTO_OUT)
 
 ##### Compile proto files for go #####
-grpc: buf-lint api-linter buf-breaking clean go-grpc fix-path
+grpc: buf-lint api-linter buf-breaking validation-lint clean go-grpc fix-path
 
 go-grpc: clean $(PROTO_OUT)
 	printf $(COLOR) "Compile for go-gRPC..."
@@ -104,6 +107,10 @@ sync-nexus-annotations:
 	printf $(COLOR) "Sync nexusannotations from buf.build/temporalio/nexus-annotations..."
 	buf export buf.build/temporalio/nexus-annotations --output .
 
+sync-protovalidate:
+	printf $(COLOR) "Sync buf/validate from buf.build/bufbuild/protovalidate..."
+	buf export buf.build/bufbuild/protovalidate --output .
+
 ##### Linters #####
 api-linter:
 	printf $(COLOR) "Run api-linter..."
@@ -124,6 +131,23 @@ buf-lint: $(STAMPDIR)/buf-mod-prune
 buf-breaking:
 	@printf $(COLOR) "Run buf breaking changes check against main branch..."
 	@(cd $(PROTO_ROOT) && buf breaking --against 'https://github.com/temporalio/api.git#branch=main')
+
+validation-lint:
+	printf $(COLOR) "Check request validation coverage..."
+	@test -n "$(VALIDATION_BASE)" || (echo "Cannot find the validation comparison commit" && exit 1)
+	@current=$$(mktemp); against=$$(mktemp); source=$$(mktemp -d); \
+	trap 'rm -f "$$current" "$$against"; rm -rf "$$source"' EXIT; \
+	buf build --as-file-descriptor-set -o "$$current"; \
+	git archive "$(VALIDATION_BASE)" | tar -x -C "$$source"; \
+	(cd "$$source" && buf build --as-file-descriptor-set -o "$$against"); \
+	server_rules="$(SERVER_VALIDATION_RULES)"; \
+	if [[ -z "$$server_rules" ]] && git cat-file -e "$(VALIDATION_BASE):temporalvalidate/v1/rules.proto" 2>/dev/null; then \
+		server_rules="$$source/server-dynamic-rules.json"; \
+		curl --fail --silent --show-error --location "$(SERVER_VALIDATION_RULES_URL)" --output "$$server_rules"; \
+	fi; \
+	server_args=(); \
+	if [[ -n "$$server_rules" ]]; then server_args=(--server-rules "$$server_rules"); fi; \
+	(cd cmd/check-validation && go run . --descriptor-set "$$current" --against "$$against" "$${server_args[@]}")
 
 nexus-rpc-yaml: nexus-rpc-yaml-install
 	printf $(COLOR) "Generate nexus/temporal-proto-models-nexusrpc.yaml..."
